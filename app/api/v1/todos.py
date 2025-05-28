@@ -2,21 +2,22 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from .functions import read_todos, create_todo, update_todo, delete_todo
 from core import database
+from app.api.v1.auth import get_current_user
 
 router = APIRouter()
 
 @router.get("/todos/")
-def get_todos(db: Session = Depends(database.get_db)):
-    return read_todos(db)
+def get_todos(db: Session = Depends(database.get_db), current_user: dict = Depends(get_current_user)):
+    return read_todos(db, current_user["id"])
 
 @router.post("/todos/")
-def create_todo_endpoint(title: str, description: str = None, completed: bool = False, db: Session = Depends(database.get_db)):
-    return create_todo(title, description, completed, db)
+def create_todo_endpoint(title: str, description: str = None, completed: bool = False, db: Session = Depends(database.get_db), current_user: dict = Depends(get_current_user)):
+    return create_todo(title, description, completed, db, current_user["id"])
 
 @router.put("/todos/{todo_id}")
-def update_todo_endpoint(id: int, title: str = None, description: str = None, completed: bool = None, db: Session = Depends(database.get_db)):
-    return update_todo(id, title, description, completed, db)
+def update_todo_endpoint(todo_id: int, title: str = None, description: str = None, completed: bool = None, db: Session = Depends(database.get_db), current_user: dict = Depends(get_current_user)):
+    return update_todo(todo_id, title, description, completed, db, current_user["id"])
 
 @router.delete("/todos/{todo_id}")
-def delete_todo_endpoint(id: int, db: Session = Depends(database.get_db)):
-    return delete_todo(id, db)
+def delete_todo_endpoint(todo_id: int, db: Session = Depends(database.get_db), current_user: dict = Depends(get_current_user)):
+    return delete_todo(todo_id, db, current_user["id"])

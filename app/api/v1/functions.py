@@ -2,18 +2,26 @@ from sqlalchemy.orm import Session
 from fastapi import HTTPException
 from core import database
 
-def read_todos(db: Session):
-    return db.query(database.Todo).all()
+def read_todos(db: Session, user_id: int):
+    return db.query(database.Todo).filter(database.Todo.user_id == user_id).all()
 
-def create_todo(title: str, description: str, completed: bool, db: Session):
-    todo = database.Todo(title=title, description=description, completed=completed)
+def create_todo(title: str, description: str, completed: bool, db: Session, user_id: int):
+    todo = database.Todo(
+        title=title,
+        description=description,
+        completed=completed,
+        user_id=user_id
+    )
     db.add(todo)
     db.commit()
     db.refresh(todo)
     return todo
 
-def update_todo(id: int, title: str, description: str, completed: bool, db: Session):
-    todo = db.query(database.Todo).filter(database.Todo.id == id).first()
+def update_todo(id: int, title: str, description: str, completed: bool, db: Session, user_id: int):
+    todo = db.query(database.Todo).filter(
+        database.Todo.id == id,
+        database.Todo.user_id == user_id
+    ).first()
     if not todo:
         raise HTTPException(status_code=404, detail="Todo not found")
     
@@ -28,8 +36,11 @@ def update_todo(id: int, title: str, description: str, completed: bool, db: Sess
     db.refresh(todo)
     return todo
 
-def delete_todo(id: int, db: Session):
-    todo = db.query(database.Todo).filter(database.Todo.id == id).first()
+def delete_todo(id: int, db: Session, user_id: int):
+    todo = db.query(database.Todo).filter(
+        database.Todo.id == id,
+        database.Todo.user_id == user_id
+    ).first()
     if not todo:
         raise HTTPException(status_code=404, detail="Todo not found")
     
