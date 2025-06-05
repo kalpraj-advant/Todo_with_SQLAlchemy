@@ -1,13 +1,17 @@
-from fastapi import FastAPI, Depends, HTTPException
-from sqlalchemy.orm import Session
-from app.api.v1 import todos, auth
+# from fastapi import FastAPI
+# from fastapi.middleware.cors import CORSMiddleware
+# from app.api.v1 import auth, todos
+# from app.core.database import engine, Base
 
-app = FastAPI(title="Todo API")
+# # Create database tables
+# Base.metadata.create_all(bind=engine)
 
-app.include_router(todos.router, prefix="/api/v1")
-app.include_router(auth.router, prefix="/api/v1")
+# app = FastAPI()
 
-@app.get("/")
-def root():
-    return {"message": "Hello"}
+# # Include routers
+# app.include_router(auth.router, prefix="/api/v1", tags=["auth"])
+# app.include_router(todos.router, prefix="/api/v1", tags=["todos"])
 
+# @app.get("/")
+# async def root():
+#     return {"message": "Hello"}

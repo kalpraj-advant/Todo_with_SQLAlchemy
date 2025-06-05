@@ -106,3 +106,73 @@ def test_create_todo(client):
     assert created_todo["title"] == "New Test Todo"
     assert created_todo["description"] == "This is a test todo"
     assert "id" in created_todo
+
+def test_update_todo(client, db):
+
+    client.post(
+        "/api/v1/auth/register",
+        json={
+            "email": "test@gmail.com",
+            "username": "test",
+            "first_name": "test",
+            "last_name": "test",
+            "password": "123"
+        }
+    )
+    
+    login_response = client.post(
+        "/api/v1/auth/login",
+        data={
+            "username": "test",
+            "password": "123"
+        }
+    )
+    token = login_response.json()["access_token"]
+    
+    test_todo = Todo(title="Original Todo", description="Original Description", user_id=1)
+    db.add(test_todo)
+    db.commit()
+    db.refresh(test_todo)
+    
+    response = client.put(
+        f"/api/v1/todos/{test_todo.id}?title=Updated Todo&description=Updated Description",
+        headers={"Authorization": f"Bearer {token}"}
+    )
+    assert response.status_code == status.HTTP_200_OK
+    updated_todo = response.json()
+    assert updated_todo["title"] == "Updated Todo"
+    assert updated_todo["description"] == "Updated Description"
+
+def test_delete_todo(client, db):
+
+    client.post(
+        "/api/v1/auth/register",
+        json={
+            "email": "test@gmail.com",
+            "username": "test",
+            "first_name": "test",
+            "last_name": "test",
+            "password": "123"
+        }
+    )
+    
+    login_response = client.post(
+        "/api/v1/auth/login",
+        data={
+            "username": "test",
+            "password": "123"
+        }
+    )
+    token = login_response.json()["access_token"]
+
+    test_todo = Todo(title="Todo to Delete", description="This todo will be deleted", user_id=1)
+    db.add(test_todo)
+    db.commit()
+    db.refresh(test_todo)
+    
+    response = client.delete(
+        f"/api/v1/todos/{test_todo.id}",
+        headers={"Authorization": f"Bearer {token}"}
+    )
+    assert response.status_code == status.HTTP_200_OK
+
